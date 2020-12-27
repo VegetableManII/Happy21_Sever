@@ -52,6 +52,7 @@ void ThreadHandle::removeThread(const QThread * thread)
             tmp->exit();
             tmp->wait(3000);
             delete thread;
+            threadNumber--;
         }
     }
 }
@@ -94,8 +95,7 @@ void ThreadHandle::initThreadSize() //建立好线程并启动，
 #ifndef Q_OS_WIN
         tmp->setEventDispatcher(new EventDispatcherLibEv());
 #endif
-        threadSize.insert(tmp,threadNumber);
-        threadNumber++;
+        threadSize.insert(tmp,1);
         tmp->start();
     }
 }
@@ -116,16 +116,17 @@ QThread * ThreadHandle::findHandleSize() //查找 到线程里的连接数 小�
 #endif
     threadSize.insert(tmp,threadNumber);
     tmp->start();
+    threadNumber++;
     return tmp;
 }
 
-QThread *ThreadHandle::findThreadSize() //遍历查找所有线程中连接数最小的那个，返回
+QThread *ThreadHandle::findThreadSize() //遍历查找所有线程  找出value值为0的线程 1==在线  0==离线
 {
     auto it = threadSize.begin();
     auto ite = threadSize.begin();
     for (++it ; it != threadSize.end(); ++it)
     {
-        if (it.value() < ite.value())
+        if (it.value() < 1)
         {
             ite = it;
         }
